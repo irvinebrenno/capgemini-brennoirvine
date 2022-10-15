@@ -1,0 +1,32 @@
+version: '3'
+volumes:
+  dados:
+networks:
+  banco:
+services:
+  db:
+    image: postgres:latest
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      # Volume dos dados
+      - dados:/var/lib/postgresql/data
+      # Scripts para iniciar banco
+      - ./scripts:/scripts
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - banco
+  app: 
+    build: .
+    container_name: "rest_api"
+    ports:
+      - "8080:8080"
+    networks:
+      - banco
+    depends_on:
+      - db
+
