@@ -6,12 +6,10 @@ import (
 	"fmt"
 	"math"
 	"strings"
-
-	"github.com/gin-gonic/gin"
 )
 
 // FinderSequence contém a lógica de negócio para validar sequência e adicionar a matriz no banco de dados
-func FinderSequence(c *gin.Context, req Sequence) (isValid bool, err error) {
+func FinderSequence(req Sequence) (isValid bool, err error) {
 	messageDefaultError := "Não foi possível encontrar sequência"
 
 	db := database.Conectar()
@@ -29,13 +27,13 @@ func FinderSequence(c *gin.Context, req Sequence) (isValid bool, err error) {
 	}
 
 	if *exists {
-		return isValid, fmt.Errorf("%v: Essa matriz já foi validada", messageDefaultError)
+		return isValid, fmt.Errorf("%v: Essa Matriz já foi validada", messageDefaultError)
 	}
 
-	// devemos validar o tamanho da matriz
+	// devemos validar se a matriz foi enviada
 	yMatriz := len(req.Latters)
 	if yMatriz == 0 {
-		return isValid, fmt.Errorf("%v: Matriz sem linhas", messageDefaultError)
+		return isValid, fmt.Errorf("%v: Sem Matriz para validar", messageDefaultError)
 	}
 
 	// buscamos a quantidade de letras que foi enviada na linha 0 da matriz e ignoramos os espaços digitados acidentalmente
@@ -70,13 +68,18 @@ func FinderSequence(c *gin.Context, req Sequence) (isValid bool, err error) {
 	}
 
 	// buscamos a quantidade de sequências válidas
+	// é necessário parar de procurar se a matriz já foi dada com válida
 	countSequences := 0
 	countSequences += checkHorizontalSequence(matriz)
-	countSequences += checkVerticalSequence(matriz)
-	countSequences += checkMainDiagonalSequence(matriz)
-	countSequences += checkSecondaryDiagonalSequence(matriz)
-
-	if countSequences >= 2 {
+	if countSequences < 2 {
+		countSequences += checkVerticalSequence(matriz)
+	}
+	if countSequences < 2 {
+		countSequences += checkMainDiagonalSequence(matriz)
+	}
+	if countSequences < 2 {
+		countSequences += checkSecondaryDiagonalSequence(matriz)
+	} else {
 		isValid = true
 	}
 
@@ -91,7 +94,7 @@ func FinderSequence(c *gin.Context, req Sequence) (isValid bool, err error) {
 }
 
 // GetStats contém a lógica de negócio para buscar o status de sequências no banco de dados
-func GetStats(c *gin.Context) (stats *Stats, err error) {
+func GetStats() (stats *Stats, err error) {
 	messageDefaultError := "Não possível buscar stats"
 	ratio := 0.0
 

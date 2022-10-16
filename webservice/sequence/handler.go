@@ -18,7 +18,7 @@ func finderSequence(c *gin.Context) {
 		return
 	}
 
-	isValid, err := sequence.FinderSequence(c, reqSequence)
+	isValid, err := sequence.FinderSequence(reqSequence)
 	if err != nil {
 		c.JSON(400, gin.H{
 			"error": err.Error(),
@@ -34,7 +34,7 @@ func finderSequence(c *gin.Context) {
 
 // getStats define um handler para buscar stats das matrizes testadas
 func getStats(c *gin.Context) {
-	res, err := sequence.GetStats(c)
+	res, err := sequence.GetStats()
 	if err != nil {
 		c.JSON(400, gin.H{
 			"error": err,
